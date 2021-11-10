@@ -1,0 +1,25 @@
+{
+  "name": "product-service",
+  "version": "1.0.0",
+  "description": "Product-service",
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.16.0",
+    "eslint-auto-fix": "^1.0.3",
+    "eslint-plugin-react": "^7.21.5",
+    "express": "^4.17.1",
+    "jest": "^26.0.1",
+    "mongoose": "^5.9.19",
+    "mongoose-unique-validator": "^2.0.3",
+    "nodemon": "^2.0.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "OnlineStore-DistSys",
+  "license": "MIT"
+}
