@@ -1,9 +1,9 @@
-import DS from "./components/DS";
+import RouterComponent from './components/navigation/RouterComponent'
 
 const App = () => {
   return (
-    <DS />
-  );
+    <RouterComponent />
+  )
 }
 
 export default App;
