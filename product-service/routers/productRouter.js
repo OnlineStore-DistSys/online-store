@@ -1,6 +1,18 @@
 const productRouter = require('express').Router()
 
-const products = [
+const redis = require('redis');
+const subscriber = redis.createClient();
+
+const channel = 'online store';
+
+subscriber.subscribe(channel, (error, channel) => {
+  if (error) {
+      throw new Error(error);
+  }
+  console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`);
+});
+
+let products = [
   {
     id: 12345,
     name: 'Chair',
@@ -20,6 +32,17 @@ const products = [
     price: 39.95
   },
 ]
+
+// Product-service got the message from message-broker (publisher) and took 5 chairs out of stock.
+subscriber.on('message', (channel, message) => {
+  console.log(`Received message from ${channel} channel: ${message}`);
+  const parts = message.split(' ')
+  let product = products.find((p) => p.id == parts[0])
+  console.log(parts)
+  console.log('before', product)
+  product = { ...product, quantity: product.quantity - parts[1]}
+  console.log('now', product)
+})
 
 productRouter.get('/', async (request, response) => {
   response.json(products.map(p => p))
