@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getProducts } from '../../services/productService'
+import ProductForm from './ProductForm'
 
 const HomeComponent = () => {
-
   const [products, setProducts] = useState([])
 
   useEffect(() => {
@@ -17,6 +17,7 @@ const HomeComponent = () => {
   return (
     <div>
       <h1>Products</h1>
+      <ProductForm />
       {products.length > 0 && (
         <ul>
           {products.map(product => (
