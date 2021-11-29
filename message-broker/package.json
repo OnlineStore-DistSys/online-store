@@ -1,7 +1,7 @@
 {
-  "name": "product-service",
+  "name": "message broker",
   "version": "1.0.0",
-  "description": "Product-service",
+  "description": "Message-broker",
   "main": "index.js",
   "dependencies": {
     "cors": "^2.8.5",
@@ -14,7 +14,8 @@
     "mongoose": "^5.9.19",
     "mongoose-unique-validator": "^2.0.3",
     "nodemon": "^2.0.4",
-    "redis": "^3.1.2"
+    "redis": "^3.1.2",
+    "uuid": "^7.0.3"
   },
   "devDependencies": {},
   "scripts": {

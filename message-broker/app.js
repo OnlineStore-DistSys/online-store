@@ -1,11 +1,11 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const productRouter = require('./routers/productRouter')
+const messageRouter = require('./routers/messageRouter')
 
 app.use(cors())
 app.use(express.json())
 
-app.use('/', productRouter)
+app.use('/', messageRouter)
 
 module.exports = app

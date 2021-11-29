@@ -33,15 +33,33 @@ let products = [
   },
 ]
 
-// Product-service got the message from message-broker (publisher) and took 5 chairs out of stock.
 subscriber.on('message', (channel, message) => {
-  console.log(`Received message from ${channel} channel: ${message}`);
+  console.log(`Received message from ${channel} channel: ${message}`)
   const parts = message.split(' ')
-  let product = products.find((p) => p.id == parts[0])
-  console.log(parts)
-  console.log('before', product)
-  product = { ...product, quantity: product.quantity - parts[1]}
-  console.log('now', product)
+  const [ msg, id, name, quantity, price ] = parts
+  let product = products.find((p) => p.id == id)
+  switch(msg) {
+    case "new":
+      if (!product) {
+        const new_product = {
+          id: parseInt(id),
+          name: name,
+          quantity: parseInt(quantity),
+          price: parseFloat(price)
+        }
+        products = products.concat(new_product)
+      }
+      console.log(products)
+      break
+    case "sold":
+      break
+    default:
+       console.log(`All good, but nothing to publish`)
+  } 
+  // these are for product purchase messaging
+  //console.log('before', product)
+  //product = { ...product, quantity: product.quantity - parts[1]}
+  //console.log('now', product)
 })
 
 productRouter.get('/', async (request, response) => {
