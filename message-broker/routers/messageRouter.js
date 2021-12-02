@@ -1,6 +1,7 @@
 const productRouter = require('express').Router()
 const redis = require('redis')
-const publisher = redis.createClient()
+const config = require('../utils/config')
+const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
 const channel = 'online store'
 
