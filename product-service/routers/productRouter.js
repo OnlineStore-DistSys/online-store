@@ -3,7 +3,7 @@ const config = require('../utils/config')
 const redis = require('redis')
 const subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
-const channel = 'online store';
+const channel = 'online store'
 
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
