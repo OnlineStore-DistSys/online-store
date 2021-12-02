@@ -14,19 +14,19 @@ subscriber.subscribe(channel, (error, channel) => {
 
 let products = [
   {
-    id: 12345,
+    id: 1234567890,
     name: 'Chair',
     quantity: 100,
     price: 99.95
   },
   {
-    id: 54321,
+    id: 5432109876,
     name: 'Couch',
     quantity: 20,
     price: 399.95
   },
   {
-    id: 15243,
+    id: 1524367890,
     name: 'Lamp',
     quantity: 50,
     price: 39.95
