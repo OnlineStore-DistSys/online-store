@@ -56,7 +56,6 @@ subscriber.on('message', (channel, message) => {
     default:
        console.log(`All good, but nothing to publish`)
   } 
-  // these are for product purchase messaging
   //console.log('before', product)
   //product = { ...product, quantity: product.quantity - parts[1]}
   //console.log('now', product)
