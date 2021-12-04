@@ -7,7 +7,14 @@ const HomeComponent = () => {
 
   useEffect(() => {
     const initProducts = async () => {
-      const fetchedProducts = await getProducts()
+      let fetchedProducts = []
+
+      try {
+        fetchedProducts = await getProducts()
+      } catch (error) {
+        console.log(error)
+      }
+
       setProducts(fetchedProducts)
     }
 

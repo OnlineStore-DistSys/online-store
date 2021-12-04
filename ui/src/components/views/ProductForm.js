@@ -8,7 +8,7 @@ const ProductForm = () => {
     const [quantity, setQuantity] = useState('')
     const [price, setPrice] = useState('')
 
-    const addProduct = (event) => {
+    const addProduct = async (event) => {
         event.preventDefault()
 
         const newProduct = {
@@ -16,7 +16,13 @@ const ProductForm = () => {
             quantity: quantity,
             price: price,
         }
-        createProduct(newProduct)
+
+        try {
+            await createProduct(newProduct)
+        } catch (error) {
+            console.log(error)
+        }
+
         setName('')
         setQuantity('')
         setPrice('')
