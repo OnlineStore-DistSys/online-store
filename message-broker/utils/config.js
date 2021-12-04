@@ -5,7 +5,6 @@ let REDIS_PORT = process.env.REDIS_PORT
 let REDIS_HOST = process.env.REDIS_HOST
 
 if (process.env.NODE_ENV === 'production') {
-  PORT = process.env.PROD_MB
   REDIS_PORT = process.env.PROD_REDIS_PORT
   REDIS_HOST = process.env.PROD_REDIS_HOST
 }
