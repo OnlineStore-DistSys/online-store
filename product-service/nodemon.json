@@ -1,0 +1,7 @@
+{
+  "events": {
+    "restart": "kill-port $(grep LOCAL_PS= .env | cut -d '=' -f2)",
+    "crash": "kill-port $(grep LOCAL_PS= .env | cut -d '=' -f2)"
+  },
+  "delay": "500"
+}

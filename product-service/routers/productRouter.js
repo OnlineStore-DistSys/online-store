@@ -2,7 +2,7 @@ const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
 const subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-
+const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const channel = 'online store'
 
 subscriber.subscribe(channel, (error, channel) => {
@@ -33,6 +33,22 @@ let products = [
   },
 ]
 
+
+const publish = async ( message, product ) => {
+  const { id, name, quantity, price } = product
+
+  switch(message) {
+    case "new":
+      publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
+      break
+    case "sold": //tba endpoint + front 
+      publisher.publish(channel, `${message} ${id} ${quantity}`)
+      break
+    default:
+       console.log(`All good, but nothing to publish`)
+  } 
+}
+
 subscriber.on('message', (channel, message) => {
   console.log(`Received message from ${channel} channel: ${message}`)
   const parts = message.split(' ')
@@ -59,6 +75,20 @@ subscriber.on('message', (channel, message) => {
   //console.log('before', product)
   //product = { ...product, quantity: product.quantity - parts[1]}
   //console.log('now', product)
+})
+
+productRouter.post('/product', async (request, response) => {
+  const body = request.body
+
+  const new_product = {
+    id: Date.now(),
+    name: body.name,
+    quantity: body.quantity,
+    price: body.price
+  }
+
+  publish('new', new_product)
+  response.json(new_product)
 })
 
 productRouter.get('/', async (request, response) => {
