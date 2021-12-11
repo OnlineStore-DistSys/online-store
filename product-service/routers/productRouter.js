@@ -45,6 +45,9 @@ const publish = async ( message, product ) => {
     case "sold": //tba endpoint + front 
       publisher.publish(channel, `${message} ${id} ${quantity}`)
       break
+    case "crash":
+      publisher.publish(channel, `${message} ${id}`)
+      break
     default:
        console.log(`All good, but nothing to publish`)
   } 
@@ -69,6 +72,10 @@ subscriber.on('message', (channel, message) => {
       console.log(products)
       break
     case "sold":
+      break
+    case "crash":
+      removeNode(id)
+      console.log('Removed ', id)
       break
     default:
        console.log(`All good, but nothing to publish`)
@@ -96,9 +103,9 @@ productRouter.post('/product', async (request, response) => {
   response.json(new_product)
 })
 
-productRouter.post('/node/remove', async (request, response) => {
-  const nodesAfterRemoval = removeNode(request.body.node)
-  response.json(nodesAfterRemoval) 
-})
+// productRouter.post('/node/remove', async (request, response) => {
+//   const nodesAfterRemoval = removeNode(request.body.node)
+//   response.json(nodesAfterRemoval) 
+// })
 
-module.exports = productRouter
+module.exports = productRouter, { publish }
