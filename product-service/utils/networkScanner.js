@@ -1,19 +1,31 @@
 const NetworkScanner = require('network-scanner-js')
-const { publish } = require('../routers/productRouter')
 const netScan = new NetworkScanner()
 const config = require('./config')
+const redis = require('redis')
+const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+const channel = 'online store'
 
 let nodes = [config.SERVER1, config.SERVER2, config.SERVER3]
 
+const publish = async ( message, id ) => {
+    switch(message) {
+      case "crash":
+        publisher.publish(channel, `${message} ${id}`)
+        break
+      default:
+         console.log(`All good, but nothing to publish`)
+    } 
+  }
+
 const handleFailed = ({ host, ip_address, status }) => {
     console.log('Reporting crash of node ', ip_address)
-    const crashProduct = {
-        id: ip_address,
-        name: '',
-        quantity: '',
-        price: ''
-    }
-    publish('crash', crashProduct)
+    // const crashProduct = {
+    //     id: ip_address,
+    //     name: '',
+    //     quantity: '',
+    //     price: ''
+    // }
+    publish('crash', ip_address)
 }
 
 const pingCluster = () => {
