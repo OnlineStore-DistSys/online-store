@@ -1,6 +1,6 @@
 const NetworkScanner = require('network-scanner-js')
 const netScan = new NetworkScanner()
-const config = require('../utils/config')
+const config = require('./config')
 const { reportFailure } = require('../services/nodeService')
 
 let nodes = [ config.SERVER1, config.SERVER2, config.SERVER3 ]
