@@ -7,8 +7,8 @@ let nodes = [ config.SERVER1, config.SERVER2, config.SERVER3 ]
 
 const handleFailed = ( { host, ip_address, status } ) => {
     removeNode(ip_address)
-    nodes.forEach((address) => {
-        const newList = reportFailure(address, ip_address)
+    nodes.forEach(async (address) => {
+        const newList = await reportFailure(address, ip_address)
         console.log(address + ' has the following list of nodes after removal: ' + newList)
     })
 }
