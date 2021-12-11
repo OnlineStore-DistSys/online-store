@@ -4,6 +4,7 @@ const redis = require('redis')
 const subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const channel = 'online store'
+const { removeNode } = require('../utils/networkScanner')
 
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
@@ -77,6 +78,10 @@ subscriber.on('message', (channel, message) => {
   //console.log('now', product)
 })
 
+productRouter.get('/', async (request, response) => {
+  response.json(products.map(p => p))
+})
+
 productRouter.post('/product', async (request, response) => {
   const body = request.body
 
@@ -91,8 +96,9 @@ productRouter.post('/product', async (request, response) => {
   response.json(new_product)
 })
 
-productRouter.get('/', async (request, response) => {
-  response.json(products.map(p => p))
+productRouter.post('/node/remove', async (request, response) => {
+  const nodesAfterRemoval = removeNode(request.body.node)
+  response.json(nodesAfterRemoval) 
 })
 
 module.exports = productRouter

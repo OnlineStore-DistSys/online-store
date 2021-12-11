@@ -1,33 +1,48 @@
 const NetworkScanner = require('network-scanner-js')
 const netScan = new NetworkScanner()
+const config = require('../utils/config')
+const { reportFailure } = require('../services/nodeService')
+
+let nodes = [ config.SERVER1, config.SERVER2, config.SERVER3 ]
 
 const handleFailed = ( { host, ip_address, status } ) => {
-    console.log('Failed node:')
-    console.log('HOST:', host)
-    console.log('IP_ADDRESS:', ip_address)
-    console.log('STATUS:', status)
+    removeNode(ip_address)
+    nodes.forEach((address) => {
+        const newList = reportFailure(address, ip_address)
+        console.log(address + ' has the following list of nodes after removal: ' + newList)
+    })
 }
 
 const pingCluster = () => {
-    var array = ['localhost']
-    netScan.clusterPing(array, nodes => {
-    nodes.map((n) => n.status === 'offline' ? handleFailed(n) : 
+    netScan.clusterPing(nodes, servers => {
+    servers.map((n) => n.status === 'offline' ? handleFailed(n) : 
     console.log(n.ip_address, 'is online'))
     })
 }
 
 const getSubnet = async () => {
-    const subnet = await netScan.getSubnet('192.168.0.1/24') 
+    const subnet = await netScan.getSubnet('' + config.SUBNET) 
     console.log(subnet)
     netScan.ipScan(subnet.host_range, host => {
         console.log(host)
     })
 }
 
+const removeNode = (IP) => {
+    const index = nodes.indexOf(IP);
+    if (index !== -1) {
+        nodes.splice(index, 1);
+    }
+    return nodes
+}
+
 const communicate = () => {
     pingCluster()
-    getSubnet()
-    setTimeout(communicate, 60000)
+    //getSubnet()
+    setTimeout(communicate, 30000)
 }
-//communicate()
-module.exports = { communicate }
+
+communicate()
+
+module.exports = { communicate, removeNode }
+
