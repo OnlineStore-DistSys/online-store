@@ -45,6 +45,7 @@ const joinNode = (IP) => {
     if (!nodes.includes(IP)) {
         nodes.push(IP)
         console.log('Added node ', IP)
+        publish('join', config.SERVER)
     }
     return nodes
 }
@@ -62,7 +63,7 @@ const communicate = () => {
     if (nodes.length === 0) {
         publish('join', config.SERVER)
     }
-    setTimeout(pingCluster, 10000)
+    //setTimeout(pingCluster, 10000)
     //getSubnet()
     setTimeout(communicate, 30000)
 }
