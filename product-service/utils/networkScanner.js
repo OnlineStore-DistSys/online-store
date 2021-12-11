@@ -5,26 +5,24 @@ const redis = require('redis')
 const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const channel = 'online store'
 
-let nodes = [config.SERVER1, config.SERVER2, config.SERVER3]
+// let nodes = [config.SERVER1, config.SERVER2, config.SERVER3]
+let nodes = []
 
-const publish = async ( message, id ) => {
-    switch(message) {
-      case "crash":
-        publisher.publish(channel, `${message} ${id}`)
-        break
+const publish = async (message, id) => {
+    switch (message) {
+        case 'join':
+            publisher.publish(channel, `${message} ${id}`)
+            break
+        case 'crash':
+            publisher.publish(channel, `${message} ${id}`)
+            break
       default:
-         console.log(`All good, but nothing to publish`)
-    } 
-  }
+            console.log(`All good, but nothing to publish`)
+    }
+}
 
 const handleFailed = ({ host, ip_address, status }) => {
     console.log('Reporting crash of node ', ip_address)
-    // const crashProduct = {
-    //     id: ip_address,
-    //     name: '',
-    //     quantity: '',
-    //     price: ''
-    // }
     publish('crash', ip_address)
 }
 
@@ -43,6 +41,14 @@ const getSubnet = async () => {
     })
 }
 
+const joinNode = (IP) => {
+    if (!nodes.includes(IP)) {
+        nodes.push(IP)
+        console.log('Added node ', IP)
+    }
+    return nodes
+}
+
 const removeNode = (IP) => {
     const index = nodes.indexOf(IP);
     if (index !== -1) {
@@ -53,6 +59,9 @@ const removeNode = (IP) => {
 }
 
 const communicate = () => {
+    if (nodes.length === 0) {
+        publish('join', config.SERVER)
+    }
     setTimeout(pingCluster, 10000)
     //getSubnet()
     setTimeout(communicate, 30000)
@@ -60,5 +69,5 @@ const communicate = () => {
 
 communicate()
 
-module.exports = { communicate, removeNode }
+module.exports = { communicate, joinNode, removeNode }
 

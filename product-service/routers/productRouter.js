@@ -4,7 +4,7 @@ const redis = require('redis')
 const subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const channel = 'online store'
-const { removeNode } = require('../utils/networkScanner')
+const { joinNode, removeNode } = require('../utils/networkScanner')
 
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
@@ -70,9 +70,11 @@ subscriber.on('message', (channel, message) => {
       break
     case "sold":
       break
+    case "join":
+      joinNode(id)
+      break
     case "crash":
       removeNode(id)
-      console.log('Removed ', id)
       break
     default:
        console.log(`All good, but nothing to publish`)
