@@ -1,0 +1,17 @@
+POST http://localhost:3001/buy/
+Content-Type: application/json
+
+{
+  "items": [{
+    "id": 5432109876,
+    "name": "Couch",
+    "quantity": 5,
+    "price": 399.95
+  },
+  {
+    "id": 1524367890,
+    "name": "Lamp",
+    "quantity": 2,
+    "price": 39.95
+  }]
+}

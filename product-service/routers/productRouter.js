@@ -6,13 +6,6 @@ const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 const channel = 'online store'
 const { joinNode, removeNode } = require('../utils/networkScanner')
 
-subscriber.subscribe(channel, (error, channel) => {
-  if (error) {
-      throw new Error(error);
-  }
-  console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
-});
-
 let products = [
   {
     id: 1234567890,
@@ -34,16 +27,22 @@ let products = [
   },
 ]
 
+subscriber.subscribe(channel, (error, channel) => {
+  if (error) {
+      throw new Error(error);
+  }
+  console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
+});
 
 const publish = async ( message, product ) => {
   const { id, name, quantity, price } = product
 
   switch(message) {
-    case "new":
+    case 'new':
       publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
       break
-    case "sold": //tba endpoint + front 
-      publisher.publish(channel, `${message} ${id} ${quantity}`)
+    case 'sold':
+      publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
       break
     default:
        console.log(`All good, but nothing to publish`)
@@ -55,7 +54,7 @@ subscriber.on('message', (channel, message) => {
   const [ msg, id, name, quantity, price ] = parts
   let product = products.find((p) => p.id == id)
   switch(msg) {
-    case "new":
+    case 'new':
       if (!product) {
         const new_product = {
           id: parseInt(id),
@@ -67,20 +66,21 @@ subscriber.on('message', (channel, message) => {
       }
       console.log(products)
       break
-    case "sold":
+    case 'sold':
+      console.log('Before: ', products)
+      //reduce the requested amount of products from the product quantity
+      products = products.map(item => item.id == product.id ? {...item, quantity: item.quantity - quantity} : item)
+      console.log('After: ', products)
       break
-    case "join":
+    case 'join':
       joinNode(id)
       break
-    case "crash":
+    case 'crash':
       removeNode(id)
       break
     default:
        console.log(`All good, but nothing to publish`)
   } 
-  //console.log('before', product)
-  //product = { ...product, quantity: product.quantity - parts[1]}
-  //console.log('now', product)
 })
 
 productRouter.get('/', async (request, response) => {
@@ -101,9 +101,33 @@ productRouter.post('/product', async (request, response) => {
   response.json(new_product)
 })
 
-// productRouter.post('/node/remove', async (request, response) => {
-//   const nodesAfterRemoval = removeNode(request.body.node)
-//   response.json(nodesAfterRemoval) 
-// })
+productRouter.post('/buy', async (request, response) => {
+  const body = request.body
+
+  let notInStock = []
+
+  //adds each item, that's being requested more than we have in store, into notInStock array 
+  body.items.forEach((requestedProduct) => {
+    const storedProduct = products.find(i => i.id === requestedProduct.id)
+    if (storedProduct.quantity - requestedProduct.quantity < 0) {
+      notInStock.push(storedProduct)
+    }
+  })
+
+  //if we have enough quantities of all of the requested items, publish the sold items into redis
+  if (notInStock.length === 0) {
+    body.items.forEach((requestedProduct) => {
+      publish('sold', requestedProduct)
+    })
+    response.json({ status: 'OK' })
+
+  //else send the list of the items (including their current storage quantity) which we had less of than requested
+  } else {
+    response.json({
+      status: 'FAIL',
+      items: notInStock
+    })
+  }
+})
 
 module.exports = productRouter

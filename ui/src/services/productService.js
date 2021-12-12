@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const getProducts = async () => {
-  const products = await axios.get("http://localhost/")
+  const products = await axios.get('http://localhost/')
   return products.data
 }
 

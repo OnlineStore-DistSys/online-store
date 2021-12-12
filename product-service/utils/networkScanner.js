@@ -26,7 +26,6 @@ const pingCluster = () => {
     }
 }
 
-
 const getSubnet = async () => {
     const subnet = await netScan.getSubnet('' + config.SUBNET)
     console.log(subnet)
