@@ -9,16 +9,7 @@ const channel = 'online store'
 let nodes = []
 
 const publish = async (message, id) => {
-    switch (message) {
-        case 'join':
-            publisher.publish(channel, `${message} ${id}`)
-            break
-        case 'crash':
-            publisher.publish(channel, `${message} ${id}`)
-            break
-      default:
-            console.log(`All good, but nothing to publish`)
-    }
+    publisher.publish(channel, `${message} ${id}`)
 }
 
 const handleFailed = ({ host, ip_address, status }) => {
