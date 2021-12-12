@@ -51,7 +51,6 @@ const publish = async ( message, product ) => {
 }
 
 subscriber.on('message', (channel, message) => {
-  console.log(`Received message from ${channel} channel: ${message}`)
   const parts = message.split(' ')
   const [ msg, id, name, quantity, price ] = parts
   let product = products.find((p) => p.id == id)
