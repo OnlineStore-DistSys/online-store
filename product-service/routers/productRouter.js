@@ -2,10 +2,33 @@
 const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
-const subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+const { joinNode, removeNode, ping } = require('../utils/networkScanner')
+
+let subscriber = redis.createClient(config.REDIS_PORT, "127.0.0.1")
+let publisher = redis.createClient(config.REDIS_PORT, "127.0.0.1")
+
+const pingRedis = () => {
+  const res = ping(config.REDIS_HOST)
+  res.then((status) => {if (status === "offline") {
+    console.log('here')
+    const res = ping(config.REDIS_HOST_R1)
+    res.then((status => {if (status === "offline") {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+    } else {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    }}))
+  } else {
+    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+  }})
+  setTimeout(pingRedis, 5000)
+}
+
+pingRedis()
+
 const channel = 'online store'
-const { joinNode, removeNode } = require('../utils/networkScanner')
 
 let products = [
   {
@@ -91,10 +114,12 @@ subscriber.on('message', (channel, message) => {
 })
 
 productRouter.get('/', async (request, response) => {
+  console.log("Nginx chose me!")
   response.json(products.map(p => p))
 })
 
 productRouter.post('/product', async (request, response) => {
+  console.log("Nginx chose me!")
   const body = request.body
 
   if (body.name == "" || !body.name) {
@@ -113,6 +138,7 @@ productRouter.post('/product', async (request, response) => {
 })
 
 productRouter.post('/buy', async (request, response) => {
+  console.log("Nginx chose me!")
   const body = request.body
 
   let notInStock = []
