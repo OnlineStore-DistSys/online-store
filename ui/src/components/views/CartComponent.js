@@ -28,7 +28,6 @@ const CartComponent = () => {
   return (
     <div>
       <h1>Shopping cart</h1>
-      <CartForm />
       {cartItems.length > 0 && (
         <ul>
           {cartItems.map((cartItem) => (
