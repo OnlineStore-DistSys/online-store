@@ -13,9 +13,9 @@ if (process.env.NODE_ENV === 'production') {
   SUBNET = process.env.PROD_SUBNET
   SERVER = process.env.PROD_PS
   REDIS_PORT = process.env.PROD_REDIS_PORT
-  REDIS_HOST = process.env.REDIS_HOST
-  REDIS_HOST_R1 = process.env.PROD_PS
-  REDIS_HOST_R2 = process.env.PROD_PS_R1
+  REDIS_HOST = process.env.PROD_PS
+  REDIS_HOST_R1 = process.env.PROD_PS_R1
+  REDIS_HOST_R2 = process.env.PROD_PS_R2
 }
 
 module.exports = {
