@@ -12,12 +12,25 @@ const publish = async (message, id) => {
     publisher.publish(channel, `${message} ${id}`)
 }
 
-const handleFailed = ({ host, ip_address, status }) => {
+const conf = {
+    repeat:4, //Specifies how many pings to send to the host, if null default is 1
+    size:56, //Size of bytes in each packet sent, if null default is 32
+    timeout:1 //Specifies the timeout of each ping in seconds, if null default is 1
+  }
+
+const ping = async ( ip ) => {
+    const poll = await netScan.poll(ip, conf)
+    return poll.status
+}
+
+ 
+const handleFailed = ({ ip_address }) => {
     console.log('Reporting crash of node ', ip_address)
     publish('crash', ip_address)
 }
 
 const pingCluster = () => {
+    // eslint-disable-next-line no-undef
     if (process.env.NODE_ENV === 'production') {
     netScan.clusterPing(nodes, servers => {
         servers.map((n) => n.status === 'offline' ? handleFailed(n) :
@@ -63,5 +76,5 @@ const communicate = () => {
 
 communicate()
 
-module.exports = { communicate, joinNode, removeNode }
+module.exports = { communicate, joinNode, removeNode, ping }
 

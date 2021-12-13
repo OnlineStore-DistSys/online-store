@@ -1,10 +1,34 @@
+/* eslint-disable no-case-declarations */
 const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
-const subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+const { joinNode, removeNode, ping } = require('../utils/networkScanner')
+
+let subscriber = redis.createClient(config.REDIS_PORT, "127.0.0.1")
+let publisher = redis.createClient(config.REDIS_PORT, "127.0.0.1")
+
+const pingRedis = () => {
+  const res = ping(config.REDIS_HOST)
+  res.then((status) => {if (status === "offline") {
+    console.log('here')
+    const res = ping(config.REDIS_HOST_R1)
+    res.then((status => {if (status === "offline") {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+    } else {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    }}))
+  } else {
+    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+  }})
+  setTimeout(pingRedis, 5000)
+}
+
+pingRedis()
+
 const channel = 'online store'
-const { joinNode, removeNode } = require('../utils/networkScanner')
 
 let products = [
   {
@@ -34,15 +58,15 @@ subscriber.subscribe(channel, (error, channel) => {
   console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
 });
 
-const publish = async ( message, product ) => {
-  const { id, name, quantity, price } = product
+const publish = async ( message, object ) => {
+  const { id, name, quantity, price } = object
 
   switch(message) {
     case 'new':
       publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
       break
     case 'sold':
-      publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
+      publisher.publish(channel, `${message} ${object}`)
       break
     default:
        console.log(`All good, but nothing to publish`)
@@ -50,26 +74,32 @@ const publish = async ( message, product ) => {
 }
 
 subscriber.on('message', (channel, message) => {
-  const parts = message.split(' ')
-  const [ msg, id, name, quantity, price ] = parts
-  let product = products.find((p) => p.id == id)
+  const parts = message.split(' ') // splitting the message parts
+  const [ msg, id, ...rest ] = parts
   switch(msg) {
     case 'new':
-      if (!product) {
-        const new_product = {
-          id: parseInt(id),
-          name: name,
-          quantity: parseInt(quantity),
-          price: parseFloat(price)
-        }
-        products = products.concat(new_product)
+    const strLength = rest.length
+    const name = rest.slice(0, strLength-2)
+    const quantity = rest[rest.length - 2] 
+    const price = rest[rest.length - 1]  
+    const new_product = {
+        id: parseInt(id),
+        name: name,
+        quantity: parseInt(quantity),
+        price: parseFloat(price)
       }
+      products = products.concat(new_product)
+     
       console.log(products)
       break
     case 'sold':
+      let soldItem = {}
       console.log('Before: ', products)
-      //reduce the requested amount of products from the product quantity
-      products = products.map(item => item.id == product.id ? {...item, quantity: item.quantity - quantity} : item)
+      rest.map((n, index) => index % 2 === 0 ? 
+      soldItem = n : 
+      products = products.map(item => item.id == soldItem ? 
+        {...item, quantity: item.quantity - n} 
+        : item))
       console.log('After: ', products)
       break
     case 'join':
@@ -84,11 +114,17 @@ subscriber.on('message', (channel, message) => {
 })
 
 productRouter.get('/', async (request, response) => {
+  console.log("Nginx chose me!")
   response.json(products.map(p => p))
 })
 
 productRouter.post('/product', async (request, response) => {
+  console.log("Nginx chose me!")
   const body = request.body
+
+  if (body.name == "" || !body.name) {
+    return response.json({ Error: "Name can not be empty"})
+  }
 
   const new_product = {
     id: Date.now(),
@@ -102,6 +138,7 @@ productRouter.post('/product', async (request, response) => {
 })
 
 productRouter.post('/buy', async (request, response) => {
+  console.log("Nginx chose me!")
   const body = request.body
 
   let notInStock = []
@@ -114,11 +151,14 @@ productRouter.post('/buy', async (request, response) => {
     }
   })
 
+
   //if we have enough quantities of all of the requested items, publish the sold items into redis
   if (notInStock.length === 0) {
-    body.items.forEach((requestedProduct) => {
-      publish('sold', requestedProduct)
+    let message = ""
+    body.items.map((requestedProduct) => {
+      message = `${message} ${requestedProduct.id} ${requestedProduct.quantity}`
     })
+    publish('sold', message)
     response.json({ status: 'OK' })
 
   //else send the list of the items (including their current storage quantity) which we had less of than requested
