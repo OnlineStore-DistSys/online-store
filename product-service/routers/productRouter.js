@@ -51,11 +51,14 @@ const publish = async ( message, object ) => {
 }
 
 subscriber.on('message', (channel, message) => {
-  const parts = message.split(' ')
+  const parts = message.split(' ') // splitting the message parts
   const [ msg, id, ...rest ] = parts
   switch(msg) {
     case 'new':
-    const [ name, quantity, price ] = rest  
+    const strLength = rest.length
+    const name = rest.slice(0, strLength-2)
+    const quantity = rest[rest.length - 2] 
+    const price = rest[rest.length - 1]  
     const new_product = {
         id: parseInt(id),
         name: name,
@@ -93,6 +96,10 @@ productRouter.get('/', async (request, response) => {
 
 productRouter.post('/product', async (request, response) => {
   const body = request.body
+
+  if (body.name == "" || !body.name) {
+    return response.json({ Error: "Name can not be empty"})
+  }
 
   const new_product = {
     id: Date.now(),
