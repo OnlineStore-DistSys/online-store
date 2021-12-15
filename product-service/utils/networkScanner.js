@@ -66,4 +66,3 @@ const communicate = (publishNet) => {
 }
 
 module.exports = { communicate, joinNode, removeNode, ping }
-

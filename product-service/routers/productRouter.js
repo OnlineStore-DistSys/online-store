@@ -7,6 +7,10 @@ const { communicate, joinNode, removeNode, ping } = require('../utils/networkSca
 let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
+//error handlers
+subscriber.on('error', (err) => console.log('Redis Client Error', err))
+publisher.on('error', (err) => console.log('Redis Client Error', err))
+
 const pingRedis = () => {
   const res = ping(config.REDIS_HOST)
   res.then((status) => {if (status === "offline") {
@@ -15,14 +19,25 @@ const pingRedis = () => {
     res.then((status => {if (status === "offline") {
       subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
       publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+
+      //error handlers
+      subscriber.on('error', (err) => console.log('Redis Client Error', err))
+      publisher.on('error', (err) => console.log('Redis Client Error', err))
     } else {
       subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
       publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+
+      //error handlers
+      subscriber.on('error', (err) => console.log('Redis Client Error', err))
+      publisher.on('error', (err) => console.log('Redis Client Error', err))
     }}))
   } else {
-    console.log("a")
     subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
     publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+
+    //error handlers
+    subscriber.on('error', (err) => console.log('Redis Client Error', err))
+    publisher.on('error', (err) => console.log('Redis Client Error', err))
   }})
   setTimeout(pingRedis, 5000)
 }
