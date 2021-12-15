@@ -62,7 +62,7 @@ const communicate = (publishNet) => {
     }
     setTimeout(()=> pingCluster(publishNet), 10000)
     //getSubnet()
-    setTimeout(communicate, 30000)
+    setTimeout(()=> communicate(publishNet), 30000)
 }
 
 module.exports = { communicate, joinNode, removeNode, ping }

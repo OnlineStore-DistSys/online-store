@@ -4,29 +4,10 @@ const config = require('../utils/config')
 const redis = require('redis')
 const { communicate, joinNode, removeNode } = require('../utils/networkScanner')
 
-let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-
-subscriber.on('error', () => {
-  subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-  subscriber.on('error', () => {
-    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-    
-  })
-})
-
-publisher.on('error', () => {
-  publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-  publisher.on('error', () => {
-    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-    
-  })
-})
-
 //error handlers
 const pingRedis = () => {
-  subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-  publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+  let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+  let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
   
   subscriber.on('error', () => {
     subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
@@ -43,43 +24,7 @@ const pingRedis = () => {
       
     })
   })
-  setTimeout(pingRedis, 5000)
-}
-
-pingRedis()
-
-/*
-const pingRedis = () => {
-  const res = ping(config.REDIS_HOST)
-  res.then((status) => {if (status === "offline") {
-    console.log('here')
-    const res = ping(config.REDIS_HOST_R1)
-    res.then((status => {if (status === "offline") {
-      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-
-      //error handlers
-      subscriber.on('error', (err) => console.log('Redis Client Error', err))
-      publisher.on('error', (err) => console.log('Redis Client Error', err))
-    } else {
-      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-
-      //error handlers
-      subscriber.on('error', (err) => console.log('Redis Client Error', err))
-      publisher.on('error', (err) => console.log('Redis Client Error', err))
-    }}))
-  } else {
-    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-
-    //error handlers
-    subscriber.on('error', (err) => console.log('Redis Client Error', err))
-    publisher.on('error', (err) => console.log('Redis Client Error', err))
-  }})
-  
-*/
-const channel = 'online store'
+  const channel = 'online store'
 
 let products = [
   {
@@ -163,7 +108,7 @@ subscriber.on('message', (channel, message) => {
       joinNode(id, publishNet)
       break
     case 'crash':
-      removeNode(id, publishNet)
+      removeNode(id)
       break
     default:
        console.log(`All good, but nothing to publish`)
@@ -226,8 +171,11 @@ productRouter.post('/buy', async (request, response) => {
     })
   }
 })
+  setTimeout(pingRedis, 5000)
+  communicate(publishNet)
+}
 
-communicate(publishNet)
+pingRedis()
 
 // module.exports = { productRouter, publishNet }
 module.exports = productRouter
