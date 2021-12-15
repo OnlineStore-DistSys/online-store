@@ -2,15 +2,53 @@
 const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
-const { communicate, joinNode, removeNode, ping } = require('../utils/networkScanner')
+const { communicate, joinNode, removeNode } = require('../utils/networkScanner')
 
 let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
-//error handlers
-subscriber.on('error', (err) => console.log('Redis Client Error', err))
-publisher.on('error', (err) => console.log('Redis Client Error', err))
+subscriber.on('error', () => {
+  subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+  subscriber.on('error', () => {
+    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+    
+  })
+})
 
+publisher.on('error', () => {
+  publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+  publisher.on('error', () => {
+    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+    
+  })
+})
+
+//error handlers
+const pingRedis = () => {
+  subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+  publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+  
+  subscriber.on('error', () => {
+    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    subscriber.on('error', () => {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      
+    })
+  })
+
+  publisher.on('error', () => {
+    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    publisher.on('error', () => {
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      
+    })
+  })
+  setTimeout(pingRedis, 5000)
+}
+
+pingRedis()
+
+/*
 const pingRedis = () => {
   const res = ping(config.REDIS_HOST)
   res.then((status) => {if (status === "offline") {
@@ -39,11 +77,8 @@ const pingRedis = () => {
     subscriber.on('error', (err) => console.log('Redis Client Error', err))
     publisher.on('error', (err) => console.log('Redis Client Error', err))
   }})
-  setTimeout(pingRedis, 5000)
-}
-
-pingRedis()
-
+  
+*/
 const channel = 'online store'
 
 let products = [
