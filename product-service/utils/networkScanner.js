@@ -41,7 +41,6 @@ const getSubnet = async () => {
 const joinNode = (IP, publishNet)  => {
     if (!nodes.includes(IP)) {
         nodes.push(IP)
-        console.log('Added node ', IP)
         publishNet('join', config.SERVER)
     }
     return nodes
@@ -49,8 +48,6 @@ const joinNode = (IP, publishNet)  => {
 
 const removeNode = (IP) => {
     const index = nodes.indexOf(IP)
-    console.log('index', index)
-    console.log('IP', IP)
     if (index !== -1) {
         nodes.splice(index, 1); 
         console.log('Removed node ', IP)
@@ -63,6 +60,7 @@ const communicate = (publishNet) => {
             publishNet('join', config.SERVER)
         }
     pingCluster(publishNet) 
+    setTimeout(()=> communicate(publishNet), 5000)
 }
 
 module.exports = { communicate, joinNode, removeNode, ping }

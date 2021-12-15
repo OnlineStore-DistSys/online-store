@@ -4,11 +4,10 @@ const config = require('../utils/config')
 const redis = require('redis')
 const { communicate, joinNode, removeNode } = require('../utils/networkScanner')
 
-//error handlers
-const pingRedis = () => {
+//redis servers below
   let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
   let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-  
+  /*
   subscriber.on('error', () => {
     console.log('Are we here?')
     subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
@@ -26,7 +25,7 @@ const pingRedis = () => {
       
     })
   })
-
+*/
 const channel = 'online store'
 
 let products = [
@@ -68,9 +67,6 @@ const publishNet = ( message, object ) => {
       publisher.publish(channel, `${message} ${object}`)
       break
     case 'crash':
-      console.log('publishnet:')
-      console.log('message:', message)
-      console.log('object:', object)
       publisher.publish(channel, `${message} ${object}`)
       break
     case 'join':
@@ -84,6 +80,7 @@ const publishNet = ( message, object ) => {
 subscriber.on('message', (channel, message) => {
   const parts = message.split(' ') // splitting the message parts
   const [ msg, id, ...rest ] = parts
+
   switch(msg) {
     case 'new':
     const strLength = rest.length
@@ -114,7 +111,6 @@ subscriber.on('message', (channel, message) => {
       joinNode(id, publishNet)
       break
     case 'crash':
-      console.log("SUB", id)
       removeNode(id)
       break
     default:
@@ -178,11 +174,8 @@ productRouter.post('/buy', async (request, response) => {
     })
   }
 })
-  setTimeout(pingRedis, 5000)
-  communicate(publishNet)
-}
 
-pingRedis()
+communicate(publishNet)
 
 // module.exports = { productRouter, publishNet }
 module.exports = productRouter
