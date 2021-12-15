@@ -24,6 +24,7 @@ const pingRedis = () => {
       
     })
   })
+
   const channel = 'online store'
 
 let products = [
