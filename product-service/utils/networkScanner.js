@@ -48,9 +48,11 @@ const joinNode = (IP, publishNet)  => {
 }
 
 const removeNode = (IP) => {
-    const index = nodes.indexOf(IP);
+    const index = nodes.indexOf(IP)
+    console.log('index', index)
+    console.log('IP', IP)
     if (index !== -1) {
-        nodes.splice(index, 1);
+        nodes.splice(index, 1); 
         console.log('Removed node ', IP)
     }
     return nodes

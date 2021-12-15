@@ -68,6 +68,9 @@ const publishNet = ( message, object ) => {
       publisher.publish(channel, `${message} ${object}`)
       break
     case 'crash':
+      console.log('publishnet:')
+      console.log('message:', message)
+      console.log('object:', object)
       publisher.publish(channel, `${message} ${object}`)
       break
     case 'join':
@@ -108,10 +111,11 @@ subscriber.on('message', (channel, message) => {
       console.log('After: ', products)
       break
     case 'join':
-      joinNode(message, publishNet)
+      joinNode(id, publishNet)
       break
     case 'crash':
-      removeNode(message)
+      console.log("SUB", id)
+      removeNode(id)
       break
     default:
        console.log(`All good, but nothing to publish`)
