@@ -70,10 +70,10 @@ const publishNet = ( message, object ) => {
       publisher.publish(channel, `${message} ${object}`)
       break
     case 'crash':
-      publisher.publish(channel, `${message} ${id}`)
+      publisher.publish(channel, `${message} ${object}`)
       break
     case 'join':
-      publisher.publish(channel, `${message} ${id}`)
+      publisher.publish(channel, `${message} ${object}`)
       break
     default:
        console.log(`All good, but nothing to publish`)
