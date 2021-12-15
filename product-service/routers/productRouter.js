@@ -2,10 +2,10 @@
 const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
-const { joinNode, removeNode, ping } = require('../utils/networkScanner')
+const { communicate, joinNode, removeNode, ping } = require('../utils/networkScanner')
 
-let subscriber = redis.createClient(config.REDIS_PORT, "127.0.0.1")
-let publisher = redis.createClient(config.REDIS_PORT, "127.0.0.1")
+let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
 const pingRedis = () => {
   const res = ping(config.REDIS_HOST)
@@ -20,6 +20,7 @@ const pingRedis = () => {
       publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
     }}))
   } else {
+    console.log("a")
     subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
     publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
   }})
@@ -58,7 +59,7 @@ subscriber.subscribe(channel, (error, channel) => {
   console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
 });
 
-const publish = async ( message, object ) => {
+const publishNet = ( message, object ) => {
   const { id, name, quantity, price } = object
 
   switch(message) {
@@ -67,6 +68,12 @@ const publish = async ( message, object ) => {
       break
     case 'sold':
       publisher.publish(channel, `${message} ${object}`)
+      break
+    case 'crash':
+      publisher.publish(channel, `${message} ${id}`)
+      break
+    case 'join':
+      publisher.publish(channel, `${message} ${id}`)
       break
     default:
        console.log(`All good, but nothing to publish`)
@@ -103,10 +110,10 @@ subscriber.on('message', (channel, message) => {
       console.log('After: ', products)
       break
     case 'join':
-      joinNode(id)
+      joinNode(id, publishNet)
       break
     case 'crash':
-      removeNode(id)
+      removeNode(id, publishNet)
       break
     default:
        console.log(`All good, but nothing to publish`)
@@ -133,7 +140,7 @@ productRouter.post('/product', async (request, response) => {
     price: body.price
   }
 
-  publish('new', new_product)
+  publishNet('new', new_product)
   response.json(new_product)
 })
 
@@ -158,7 +165,7 @@ productRouter.post('/buy', async (request, response) => {
     body.items.map((requestedProduct) => {
       message = `${message} ${requestedProduct.id} ${requestedProduct.quantity}`
     })
-    publish('sold', message)
+    publishNet('sold', message)
     response.json({ status: 'OK' })
 
   //else send the list of the items (including their current storage quantity) which we had less of than requested
@@ -170,4 +177,7 @@ productRouter.post('/buy', async (request, response) => {
   }
 })
 
+communicate(publishNet)
+
+// module.exports = { productRouter, publishNet }
 module.exports = productRouter

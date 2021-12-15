@@ -1,21 +1,13 @@
 const NetworkScanner = require('network-scanner-js')
 const netScan = new NetworkScanner()
 const config = require('./config')
-const redis = require('redis')
-const publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-const channel = 'online store'
 
-// let nodes = [config.SERVER1, config.SERVER2, config.SERVER3]
 let nodes = []
 
-const publish = async (message, id) => {
-    publisher.publish(channel, `${message} ${id}`)
-}
-
 const conf = {
-    repeat:4, //Specifies how many pings to send to the host, if null default is 1
-    size:56, //Size of bytes in each packet sent, if null default is 32
-    timeout:1 //Specifies the timeout of each ping in seconds, if null default is 1
+    repeat:4,
+    size:56, 
+    timeout:1 
   }
 
 const ping = async ( ip ) => {
@@ -23,17 +15,16 @@ const ping = async ( ip ) => {
     return poll.status
 }
 
- 
-const handleFailed = ({ ip_address }) => {
+const handleFailed = ({ ip_address }, publishNet) => {
     console.log('Reporting crash of node ', ip_address)
-    publish('crash', ip_address)
+    publishNet('crash', ip_address)
 }
 
-const pingCluster = () => {
+const pingCluster = (publishNet) => {
     // eslint-disable-next-line no-undef
     if (process.env.NODE_ENV === 'production') {
     netScan.clusterPing(nodes, servers => {
-        servers.map((n) => n.status === 'offline' ? handleFailed(n) :
+        servers.map((n) => n.status === 'offline' ? handleFailed(n, publishNet) :
             console.log(n.ip_address, 'is online'))
         })
     }
@@ -47,11 +38,11 @@ const getSubnet = async () => {
     })
 }
 
-const joinNode = (IP) => {
+const joinNode = (IP, publishNet)  => {
     if (!nodes.includes(IP)) {
         nodes.push(IP)
         console.log('Added node ', IP)
-        publish('join', config.SERVER)
+        publishNet('join', config.SERVER)
     }
     return nodes
 }
@@ -65,16 +56,14 @@ const removeNode = (IP) => {
     return nodes
 }
 
-const communicate = () => {
+const communicate = (publishNet) => {
     if (nodes.length === 0) {
-        publish('join', config.SERVER)
+        publishNet('join', config.SERVER)
     }
-    setTimeout(pingCluster, 10000)
+    setTimeout(()=> pingCluster(publishNet), 10000)
     //getSubnet()
     setTimeout(communicate, 30000)
 }
-
-communicate()
 
 module.exports = { communicate, joinNode, removeNode, ping }
 
