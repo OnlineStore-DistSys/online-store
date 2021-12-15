@@ -10,6 +10,7 @@ const pingRedis = () => {
   let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
   
   subscriber.on('error', () => {
+    console.log('Are we here?')
     subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
     subscriber.on('error', () => {
       subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
@@ -18,6 +19,7 @@ const pingRedis = () => {
   })
 
   publisher.on('error', () => {
+    console.log('Are we here?')
     publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
     publisher.on('error', () => {
       publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
@@ -25,7 +27,7 @@ const pingRedis = () => {
     })
   })
 
-  const channel = 'online store'
+const channel = 'online store'
 
 let products = [
   {
@@ -106,10 +108,10 @@ subscriber.on('message', (channel, message) => {
       console.log('After: ', products)
       break
     case 'join':
-      joinNode(id, publishNet)
+      joinNode(message, publishNet)
       break
     case 'crash':
-      removeNode(id)
+      removeNode(message)
       break
     default:
        console.log(`All good, but nothing to publish`)
