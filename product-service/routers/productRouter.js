@@ -43,7 +43,7 @@ const pingRedis = () => {
       
     })
   })
-  setTimeout(pingRedis, 5000)
+  setTimeout(pingRedis, 500)
 }
 
 pingRedis()

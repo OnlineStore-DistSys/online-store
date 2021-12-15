@@ -57,9 +57,12 @@ const removeNode = (IP) => {
 }
 
 const communicate = (publishNet) => {
-    if (nodes.length === 0) {
-        publishNet('join', config.SERVER)
+    const publishJoin = () => {
+        if (nodes.length === 0) {
+            publishNet('join', config.SERVER)
+        }
     }
+    setTimeout(publishJoin, 1000)
     setTimeout(()=> pingCluster(publishNet), 10000)
     //getSubnet()
     setTimeout(communicate, 30000)
