@@ -1,9 +1,10 @@
 const axios = require('axios')
-const { nodes } = require('./networkScanner')
+let { nodes } = require('./networkScanner')
 
 const APIcall = async () => {
     let products = []
-    console.log(nodes)
+    nodes = ['server1', 'server2']
+    console.log(nodes.length)
     if (nodes.length == 0) {
         products = [
         {
