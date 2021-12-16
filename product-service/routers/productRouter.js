@@ -2,52 +2,23 @@
 const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
-const { communicate, joinNode, removeNode } = require('../utils/networkScanner')
+const { communicate, joinNode, removeNode } = require('../api/networkScanner')
 
-//redis servers below
-  let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-  let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-  /*
-  subscriber.on('error', () => {
-    console.log('Are we here?')
-    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-    subscriber.on('error', () => {
-      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-      
-    })
-  })
+let { APIcall } = require('../api/apihandler')
 
-  publisher.on('error', () => {
-    console.log('Are we here?')
-    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-    publisher.on('error', () => {
-      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-      
-    })
-  })
-*/
+let products = []
+
+const getData = async () => {
+  products = await APIcall()
+  console.log(products)
+}
+
+getData()
+
+let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+
 const channel = 'online store'
-
-let products = [
-  {
-    id: 1234567890,
-    name: 'Chair',
-    quantity: 100,
-    price: 99.95
-  },
-  {
-    id: 5432109876,
-    name: 'Couch',
-    quantity: 20,
-    price: 399.95
-  },
-  {
-    id: 1524367890,
-    name: 'Lamp',
-    quantity: 50,
-    price: 39.95
-  },
-]
 
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
@@ -179,3 +150,25 @@ communicate(publishNet)
 
 // module.exports = { productRouter, publishNet }
 module.exports = productRouter
+
+
+//redis servers below
+/*
+subscriber.on('error', () => {
+    console.log('Are we here?')
+    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    subscriber.on('error', () => {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      
+    })
+  })
+
+  publisher.on('error', () => {
+    console.log('Are we here?')
+    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    publisher.on('error', () => {
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      
+    })
+  })
+*/

@@ -1,6 +1,6 @@
 const NetworkScanner = require('network-scanner-js')
 const netScan = new NetworkScanner()
-const config = require('./config')
+const config = require('../utils/config')
 
 let nodes = []
 
@@ -63,4 +63,4 @@ const communicate = (publishNet) => {
     setTimeout(()=> communicate(publishNet), 5000)
 }
 
-module.exports = { communicate, joinNode, removeNode, ping }
+module.exports = { communicate, joinNode, removeNode, ping, nodes }
