@@ -3,8 +3,7 @@ let { nodes } = require('./networkScanner')
 
 const APIcall = async () => {
     let products = []
-    nodes = ['server1', 'server2']
-    console.log(nodes.length)
+    console.log(nodes)
     if (nodes.length == 0) {
         products = [
         {
