@@ -79,7 +79,9 @@ subscriber.on('message', (channel, message) => {
       break
     case 'join':
       joinNode(id, publishNet)
-      getData()
+      if (products == []) {
+        getData()
+      }
       break
     case 'crash':
       removeNode(id)
