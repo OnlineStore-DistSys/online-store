@@ -2,54 +2,23 @@
 const productRouter = require('express').Router()
 const config = require('../utils/config')
 const redis = require('redis')
-const { joinNode, removeNode, ping } = require('../utils/networkScanner')
+const { communicate, joinNode, removeNode } = require('../api/networkScanner')
 
-let subscriber = redis.createClient(config.REDIS_PORT, "127.0.0.1")
-let publisher = redis.createClient(config.REDIS_PORT, "127.0.0.1")
+let { APIcall } = require('../api/apihandler')
 
-const pingRedis = () => {
-  const res = ping(config.REDIS_HOST)
-  res.then((status) => {if (status === "offline") {
-    console.log('here')
-    const res = ping(config.REDIS_HOST_R1)
-    res.then((status => {if (status === "offline") {
-      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-    } else {
-      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-    }}))
-  } else {
-    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-  }})
-  setTimeout(pingRedis, 5000)
+let products = []
+
+const getData = async () => {
+  products = await APIcall()
+  console.log(products)
 }
 
-pingRedis()
+getData()
+
+let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
 const channel = 'online store'
-
-let products = [
-  {
-    id: 1234567890,
-    name: 'Chair',
-    quantity: 100,
-    price: 99.95
-  },
-  {
-    id: 5432109876,
-    name: 'Couch',
-    quantity: 20,
-    price: 399.95
-  },
-  {
-    id: 1524367890,
-    name: 'Lamp',
-    quantity: 50,
-    price: 39.95
-  },
-]
 
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
@@ -58,7 +27,7 @@ subscriber.subscribe(channel, (error, channel) => {
   console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
 });
 
-const publish = async ( message, object ) => {
+const publishNet = ( message, object ) => {
   const { id, name, quantity, price } = object
 
   switch(message) {
@@ -66,6 +35,12 @@ const publish = async ( message, object ) => {
       publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
       break
     case 'sold':
+      publisher.publish(channel, `${message} ${object}`)
+      break
+    case 'crash':
+      publisher.publish(channel, `${message} ${object}`)
+      break
+    case 'join':
       publisher.publish(channel, `${message} ${object}`)
       break
     default:
@@ -76,6 +51,7 @@ const publish = async ( message, object ) => {
 subscriber.on('message', (channel, message) => {
   const parts = message.split(' ') // splitting the message parts
   const [ msg, id, ...rest ] = parts
+
   switch(msg) {
     case 'new':
     const strLength = rest.length
@@ -103,7 +79,7 @@ subscriber.on('message', (channel, message) => {
       console.log('After: ', products)
       break
     case 'join':
-      joinNode(id)
+      joinNode(id, publishNet)
       break
     case 'crash':
       removeNode(id)
@@ -133,7 +109,7 @@ productRouter.post('/product', async (request, response) => {
     price: body.price
   }
 
-  publish('new', new_product)
+  publishNet('new', new_product)
   response.json(new_product)
 })
 
@@ -158,7 +134,7 @@ productRouter.post('/buy', async (request, response) => {
     body.items.map((requestedProduct) => {
       message = `${message} ${requestedProduct.id} ${requestedProduct.quantity}`
     })
-    publish('sold', message)
+    publishNet('sold', message)
     response.json({ status: 'OK' })
 
   //else send the list of the items (including their current storage quantity) which we had less of than requested
@@ -170,4 +146,29 @@ productRouter.post('/buy', async (request, response) => {
   }
 })
 
+communicate(publishNet)
+
+// module.exports = { productRouter, publishNet }
 module.exports = productRouter
+
+
+//redis servers below
+/*
+subscriber.on('error', () => {
+    console.log('Are we here?')
+    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    subscriber.on('error', () => {
+      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      
+    })
+  })
+
+  publisher.on('error', () => {
+    console.log('Are we here?')
+    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
+    publisher.on('error', () => {
+      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
+      
+    })
+  })
+*/
