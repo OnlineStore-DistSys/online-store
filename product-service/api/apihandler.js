@@ -27,9 +27,14 @@ const APIcall = async () => {
         ]
         return products
     } else {
-        const res = await axios.get("http://localhost/")
-        products = res.data
-        return products
+        try {
+            const res = await axios.get("http://localhost/")
+            products = res.data
+            return products
+        } catch (err) {
+            console.log(err)
+        }
+        
     }
 }
 
