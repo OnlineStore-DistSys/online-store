@@ -13,7 +13,6 @@ const getData = async () => {
   console.log(products)
 }
 
-setTimeout(()=> getData())
 
 let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
@@ -80,6 +79,7 @@ subscriber.on('message', (channel, message) => {
       break
     case 'join':
       joinNode(id, publishNet)
+      getData()
       break
     case 'crash':
       removeNode(id)
@@ -88,6 +88,8 @@ subscriber.on('message', (channel, message) => {
        console.log(`All good, but nothing to publish`)
   } 
 })
+
+
 
 productRouter.get('/', async (request, response) => {
   console.log("Nginx chose me!")
