@@ -41,6 +41,7 @@ const getSubnet = async () => {
 const joinNode = (IP, publishNet)  => {
     if (!nodes.includes(IP)) {
         nodes.push(IP)
+        console.log('Added node ', IP)
         publishNet('join', config.SERVER)
     }
     return nodes

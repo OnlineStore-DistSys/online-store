@@ -13,7 +13,7 @@ const getData = async () => {
   console.log(products)
 }
 
-getData()
+setTimeout(()=> getData())
 
 let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
