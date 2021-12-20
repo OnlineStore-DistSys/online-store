@@ -1,11 +1,13 @@
 # Online store
 
-This is a repository for _Online-store_ distributed system. In the online-store, there is possibility to add items in a fault tolerant manner. 
+This is a repository for _Online-store_ distributed system. In the online-store, there is possibility to add items in a fault tolerant manner. Here below are some important links regarding our project:
+
+[Product Backlog](https://github.com/orgs/OnlineStore-DistSys/projects/1)
 
 [Frontend](https://github.com/OnlineStore-DistSys/online-store/tree/main/ui)
 
 [Product-service](https://github.com/OnlineStore-DistSys/online-store/tree/main/product-service)
 
-[Installation](https://github.com/OnlineStore-DistSys/online-store/wiki/Installation-instructions)
+[Installation & running instructions](https://github.com/OnlineStore-DistSys/online-store/wiki/Installation-instructions)
 
-[Architecture](https://github.com/OnlineStore-DistSys/online-store/wiki/Architecture)
+[Architecture and techniques of the system](https://github.com/OnlineStore-DistSys/online-store/wiki/Architecture)
