@@ -1,6 +1,10 @@
 /* eslint-disable no-undef */
 const axios = require('axios')
 
+/**
+ * Description
+ * @returns {any}
+ */
 const apiCall = async () => {
     let products = []
     try {
@@ -9,8 +13,6 @@ const apiCall = async () => {
         return products
     } catch (err) {
         console.log(err)
-    
-        
     }
 }
 

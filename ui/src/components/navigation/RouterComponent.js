@@ -3,6 +3,10 @@ import NavBarComponent from './NavBarComponent'
 import HomeComponent from '../views/HomeComponent'
 import CartComponent from '../views/CartComponent'
 
+/**
+ * Description
+ * @returns {any}
+ */
 const RouterComponent = () => {
   return (
     <Router>

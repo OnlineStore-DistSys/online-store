@@ -11,16 +11,29 @@ let products = [{
   price: 99.95
 }]
 
+/**
+ * Description
+ * @returns {any}
+ */
 const updateProducts = async () => {
   return products 
 }
 
+/**
+ * Description
+ * @returns {any}
+ */
 const getData = async () => {
     products = await apiCall()
     console.log(products)
     return products
 }
 
+/**
+ * Description
+ * @param {any} publishNet
+ * @returns {any}
+ */
 const communicate = async (publishNet) => {
   console.log(nodes)
   if (nodes.length === 0) {
@@ -40,6 +53,13 @@ let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
 const channel = 'online store'
 
+/**
+ * Description
+ * @param {any} channel
+ * @param {any} (error
+ * @param {any} channel
+ * @returns {any}
+ */
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
       throw new Error(error);
@@ -47,6 +67,12 @@ subscriber.subscribe(channel, (error, channel) => {
   console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
 });
 
+/**
+ * Description
+ * @param {any} message
+ * @param {any} object
+ * @returns {any}
+ */
 const publishNet = ( message, object ) => {
   const { id, name, quantity, price } = object
 
@@ -68,6 +94,13 @@ const publishNet = ( message, object ) => {
   } 
 }
 
+/**
+ * Description
+ * @param {any} 'message'
+ * @param {any} (channel
+ * @param {any} message
+ * @returns {any}
+ */
 subscriber.on('message', (channel, message) => {
   const parts = message.split(' ') // splitting the message parts
   const [ msg, id, ...rest ] = parts
@@ -108,7 +141,7 @@ subscriber.on('message', (channel, message) => {
        console.log(`All good, but nothing to publish`)
   } 
 })
-console.log('mb products', products)
+
 communicate(publishNet)
 
 module.exports = { publishNet, products, updateProducts }

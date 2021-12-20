@@ -2,21 +2,36 @@
 const productRouter = require('express').Router()
 let { publishNet, products, updateProducts } = require('../messagebroker/messageBroker')
 
+/**
+ * Description
+ * @returns {any}
+ */
 const update = async () => {
   products = await updateProducts() 
-  setTimeout(()=> { update()
-    console.log('productRouter', products)} , 1000)
+  setTimeout(()=> update(), 1000)
 }
 
 update()
 
-
+/**
+ * Description
+ * @param {any} '/'
+ * @param {any} async(request
+ * @param {any} response
+ * @returns {any}
+ */
 productRouter.get('/', async (request, response) => {
-  console.log("Nginx chose me 1!")
-  
+  console.log("Nginx chose me")
   response.json(products.map(p => p))
 })
 
+/**
+ * Description
+ * @param {any} '/product'
+ * @param {any} async(request
+ * @param {any} response
+ * @returns {any}
+ */
 productRouter.post('/product', async (request, response) => {
   console.log("Nginx chose me!")
   const body = request.body
@@ -25,18 +40,25 @@ productRouter.post('/product', async (request, response) => {
     return response.json({ Error: "Name can not be empty"})
   }
 
-  const new_product = {
+  const newProduct = {
     id: Date.now(),
     name: body.name,
     quantity: body.quantity,
     price: body.price
   }
 
-  publishNet('new', new_product)
-  response.json(new_product)
+  publishNet('new', newProduct)
+  response.json(newProduct)
 })
 
 
+/**
+ * Description
+ * @param {any} '/buy'
+ * @param {any} async(request
+ * @param {any} response
+ * @returns {any}
+ */
 productRouter.post('/buy', async (request, response) => {
   console.log("Nginx chose me nro1!")
   const body = request.body
@@ -71,25 +93,3 @@ productRouter.post('/buy', async (request, response) => {
 })
 
 module.exports = productRouter
-
-
-//redis servers below
-/*
-subscriber.on('error', () => {
-    console.log('Are we here?')
-    subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-    subscriber.on('error', () => {
-      subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-      
-    })
-  })
-
-  publisher.on('error', () => {
-    console.log('Are we here?')
-    publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R1)
-    publisher.on('error', () => {
-      publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST_R2)
-      
-    })
-  })
-*/
