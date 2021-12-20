@@ -2,7 +2,7 @@
 const axios = require('axios')
 
 /**
- * Description
+ * This function calls nginx (load balancer) to return up-to-date list of products from some other node.
  * @returns {any}
  */
 const apiCall = async () => {
@@ -15,8 +15,5 @@ const apiCall = async () => {
         console.log(err)
     }
 }
-
-
-
 
 module.exports = { apiCall }

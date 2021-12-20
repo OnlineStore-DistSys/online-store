@@ -3,7 +3,7 @@ const productRouter = require('express').Router()
 let { publishNet, products, updateProducts } = require('../messagebroker/messageBroker')
 
 /**
- * Fetches products from local message-broker module
+ * Fetches products from local message-broker module's getter
  */
 const update = async () => {
   products = await updateProducts() 
@@ -23,7 +23,7 @@ productRouter.get('/', async (request, response) => {
 })
 
 /**
- * The product endpoint accepts new products 
+ * The product endpoint accepts new products sent by requests
  * @param {any} '/product'
  * @param {any} request
  * @param {any} response
@@ -36,6 +36,7 @@ productRouter.post('/product', async (request, response) => {
     return response.json({ Error: "Name can not be empty"})
   }
 
+  //construct the new product from the request
   const newProduct = {
     id: Date.now(),
     name: body.name,
@@ -43,13 +44,14 @@ productRouter.post('/product', async (request, response) => {
     price: body.price
   }
 
+  //publish the new product into redis
   publishNet('new', newProduct)
   response.json(newProduct)
 })
 
 
 /**
- * Description
+ * The buy endpoint accepts purchases that are requested from the node
  * @param {any} '/buy'
  * @param {any} async(request
  * @param {any} response
@@ -68,7 +70,6 @@ productRouter.post('/buy', async (request, response) => {
       notInStock.push(storedProduct)
     }
   })
-
 
   //if we have enough quantities of all of the requested items, publish the sold items into redis
   if (notInStock.length === 0) {

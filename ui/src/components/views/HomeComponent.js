@@ -6,6 +6,8 @@ import { Button } from "../StyledComponents"
 const HomeComponent = (props) => {
   const [products, setProducts] = useState([])
 
+  //initializes products from backend whenever page reloads
+  //(should be improved to persist changes caused by moving items in/out from local shopping cart)
   useEffect(() => {
     const initProducts = async () => {
       let fetchedProducts = []
@@ -22,6 +24,7 @@ const HomeComponent = (props) => {
     initProducts()
   }, [])
 
+  //function for adding the product into the shopping cart
   const addProduct = (product) => {
     const addedProduct = { ...product, quantity: 1 } //add one instance of the product
     const alreadyAdded = props.cartItems.find((item) => item.id === addedProduct.id)

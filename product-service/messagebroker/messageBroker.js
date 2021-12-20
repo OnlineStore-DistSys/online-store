@@ -12,7 +12,7 @@ let products = [{
 }]
 
 /**
- * Description
+ * Getter for the list of products
  * @returns {any}
  */
 const updateProducts = async () => {
@@ -20,7 +20,7 @@ const updateProducts = async () => {
 }
 
 /**
- * Description
+ * Launches the API call in order to fetch up-to-date product list
  * @returns {any}
  */
 const getData = async () => {
@@ -30,7 +30,7 @@ const getData = async () => {
 }
 
 /**
- * Description
+ * The main loop. Orchestrates the initial joining, initial product data fetching, and cluster pings to spot failed nodes
  * @param {any} publishNet
  * @returns {any}
  */
@@ -48,18 +48,13 @@ const communicate = async (publishNet) => {
   setTimeout(()=> communicate(publishNet), 5000)
 }
 
+//redis pub/sub channel initialization
 let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
 
 const channel = 'online store'
 
-/**
- * Description
- * @param {any} channel
- * @param {any} (error
- * @param {any} channel
- * @returns {any}
- */
+//subscription to channel
 subscriber.subscribe(channel, (error, channel) => {
   if (error) {
       throw new Error(error);
@@ -68,7 +63,7 @@ subscriber.subscribe(channel, (error, channel) => {
 });
 
 /**
- * Description
+ * This function is used for publishing messages to the redis channel
  * @param {any} message
  * @param {any} object
  * @returns {any}
@@ -95,7 +90,7 @@ const publishNet = ( message, object ) => {
 }
 
 /**
- * Description
+ * This function is used for catching and processing messages that were heard from the redis channel
  * @param {any} 'message'
  * @param {any} (channel
  * @param {any} message
@@ -106,7 +101,7 @@ subscriber.on('message', (channel, message) => {
   const [ msg, id, ...rest ] = parts
 
   switch(msg) {
-    case 'new':
+    case 'new': //adds the product that someone published to the channel
     const strLength = rest.length
     const name = rest.slice(0, strLength-2)
     const quantity = rest[rest.length - 2] 
@@ -121,7 +116,7 @@ subscriber.on('message', (channel, message) => {
       products = products.concat(new_product)
       console.log('new', products)
       break
-    case 'sold':
+    case 'sold': //reduces the products that were bought from some other node of the channel
       let soldItem = {}
       console.log('Before: ', products)
       rest.map((n, index) => index % 2 === 0 ? 
@@ -131,10 +126,10 @@ subscriber.on('message', (channel, message) => {
         : item))
       console.log('After: ', products)
       break
-    case 'join':
+    case 'join': //handle a join request
       joinNode(id, publishNet)
       break
-    case 'crash':
+    case 'crash': //remove a node whose crash was published to the redis channel
       removeNode(id)
       break
     default:
@@ -142,6 +137,7 @@ subscriber.on('message', (channel, message) => {
   } 
 })
 
+//launch the main loop
 communicate(publishNet)
 
 module.exports = { publishNet, products, updateProducts }

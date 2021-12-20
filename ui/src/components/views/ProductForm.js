@@ -8,21 +8,25 @@ const ProductForm = () => {
     const [quantity, setQuantity] = useState('')
     const [price, setPrice] = useState('')
 
+    //function to add a new product
     const addProduct = async (event) => {
         event.preventDefault()
 
+        //construct the product from the input fields
         const newProduct = {
             name: name,
             quantity: quantity,
             price: price,
         }
 
+        //post the product into a product-service
         try {
             await createProduct(newProduct)
         } catch (error) {
             console.log(error)
         }
 
+        //refresh the form
         setName('')
         setQuantity('')
         setPrice('')

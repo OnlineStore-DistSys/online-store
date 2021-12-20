@@ -11,7 +11,7 @@ const conf = {
   }
 
 /**
- * Description
+ * Pings the IP that's given as a parameter, and returns the node's status
  * @param {any} ip
  * @returns {any}
  */
@@ -21,18 +21,18 @@ const ping = async ( ip ) => {
 }
 
 /**
- * Description
- * @param {any} {ipAddress}
+ * Publishes the news that a node has failed, into the Redis channel
+ * @param {any} {ip_address}
  * @param {any} publishNet
  * @returns {any}
  */
-const handleFailed = ({ ipAddress }, publishNet) => {
-    console.log('Reporting crash of node ', ipAddress)
-    publishNet('crash', ipAddress)
+const handleFailed = ({ ip_address }, publishNet) => {
+    console.log('Reporting crash of node ', ip_address)
+    publishNet('crash', ip_address)
 }
 
 /**
- * Description
+ * Pings all the other nodes to check whether they're all alive (if not, calls handleFailed)
  * @param {any} publishNet
  * @returns {any}
  */
@@ -41,17 +41,17 @@ const pingCluster = (publishNet) => {
     if (process.env.NODE_ENV === 'production') {
     netScan.clusterPing(nodes, servers => {
         servers.map((n) => n.status === 'offline' ? handleFailed(n, publishNet) :
-            console.log(n.ipAddress, 'is online'))
+            console.log(n.ip_address, 'is online'))
         })
     }
 }
 /**
- * Description
+ * If a new node joins the network, add it to list of IPs and respond with a join message
+ * to the channel (in order to let the new node receive everyone's IP as well)
  * @param {any} ip
  * @param {any} publishNet
  * @returns {any}
  */
-
 const joinNode = (ip, publishNet)  => {
     if (!nodes.includes(ip)) {
         nodes.push(ip)
@@ -62,7 +62,7 @@ const joinNode = (ip, publishNet)  => {
 }
 
 /**
- * Description
+ * Remove a failed node's IP from the IP list
  * @param {any} ip
  * @returns {any}
  */

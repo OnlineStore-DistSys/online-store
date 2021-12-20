@@ -4,11 +4,10 @@ import NavBarComponent from './NavBarComponent'
 import HomeComponent from '../views/HomeComponent'
 import CartComponent from '../views/CartComponent'
 
-/**
- * Description
- * @returns {any}
- */
+//manages navigation between the pages
 const RouterComponent = () => {
+
+  //the state of the local shopping cart
   const [cartItems, setCartItems] = useState([])
 
   return (
