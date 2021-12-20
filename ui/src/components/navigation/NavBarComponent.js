@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom'
 import ContainerStyles from '../../styles/ContainerStyles'
 
+/**
+ * Description
+ * @returns {any}
+ */
 const NavBarComponent = () => {
   return (
     <div>
