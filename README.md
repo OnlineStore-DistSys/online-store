@@ -10,4 +10,4 @@ This is a repository for _Online-store_ distributed system. In the online-store,
 
 [Installation & running instructions](https://github.com/OnlineStore-DistSys/online-store/wiki/Installation-instructions)
 
-[Architecture and techniques of the system](https://github.com/OnlineStore-DistSys/online-store/wiki/Architecture)
+[Architecture & techniques of the system](https://github.com/OnlineStore-DistSys/online-store/wiki/Architecture)
