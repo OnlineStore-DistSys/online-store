@@ -1,100 +1,19 @@
 /* eslint-disable no-case-declarations */
 const productRouter = require('express').Router()
-const config = require('../utils/config')
-const redis = require('redis')
-const { communicate, joinNode, removeNode } = require('../api/networkScanner')
+let { publishNet, products, updateProducts } = require('../messagebroker/messageBroker')
 
-let { APIcall } = require('../api/apihandler')
-
-let products = []
-
-const getData = async () => {
-  products = await APIcall()
-  console.log(products)
+const update = async () => {
+  products = await updateProducts() 
+  setTimeout(()=> { update()
+    console.log('productRouter', products)} , 1000)
 }
 
-
-let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
-
-const channel = 'online store'
-
-subscriber.subscribe(channel, (error, channel) => {
-  if (error) {
-      throw new Error(error);
-  }
-  console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
-});
-
-const publishNet = ( message, object ) => {
-  const { id, name, quantity, price } = object
-
-  switch(message) {
-    case 'new':
-      publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
-      break
-    case 'sold':
-      publisher.publish(channel, `${message} ${object}`)
-      break
-    case 'crash':
-      publisher.publish(channel, `${message} ${object}`)
-      break
-    case 'join':
-      publisher.publish(channel, `${message} ${object}`)
-      break
-    default:
-       console.log(`All good, but nothing to publish`)
-  } 
-}
-
-subscriber.on('message', (channel, message) => {
-  const parts = message.split(' ') // splitting the message parts
-  const [ msg, id, ...rest ] = parts
-
-  switch(msg) {
-    case 'new':
-    const strLength = rest.length
-    const name = rest.slice(0, strLength-2)
-    const quantity = rest[rest.length - 2] 
-    const price = rest[rest.length - 1]  
-    const new_product = {
-        id: parseInt(id),
-        name: name,
-        quantity: parseInt(quantity),
-        price: parseFloat(price)
-      }
-      products = products.concat(new_product)
-     
-      console.log(products)
-      break
-    case 'sold':
-      let soldItem = {}
-      console.log('Before: ', products)
-      rest.map((n, index) => index % 2 === 0 ? 
-      soldItem = n : 
-      products = products.map(item => item.id == soldItem ? 
-        {...item, quantity: item.quantity - n} 
-        : item))
-      console.log('After: ', products)
-      break
-    case 'join':
-      joinNode(id, publishNet)
-      if (products == []) {
-        getData()
-      }
-      break
-    case 'crash':
-      removeNode(id)
-      break
-    default:
-       console.log(`All good, but nothing to publish`)
-  } 
-})
-
+update()
 
 
 productRouter.get('/', async (request, response) => {
-  console.log("Nginx chose me!")
+  console.log("Nginx chose me 1!")
+  
   response.json(products.map(p => p))
 })
 
@@ -117,8 +36,9 @@ productRouter.post('/product', async (request, response) => {
   response.json(new_product)
 })
 
+
 productRouter.post('/buy', async (request, response) => {
-  console.log("Nginx chose me!")
+  console.log("Nginx chose me nro1!")
   const body = request.body
 
   let notInStock = []
@@ -150,9 +70,6 @@ productRouter.post('/buy', async (request, response) => {
   }
 })
 
-communicate(publishNet)
-
-// module.exports = { productRouter, publishNet }
 module.exports = productRouter
 
 

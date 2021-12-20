@@ -56,12 +56,6 @@ const removeNode = (IP) => {
     return nodes
 }
 
-const communicate = (publishNet) => {
-    if (nodes.length === 0) {
-            publishNet('join', config.SERVER)
-        }
-    pingCluster(publishNet) 
-    setTimeout(()=> communicate(publishNet), 5000)
-}
 
-module.exports = { communicate, joinNode, removeNode, ping, nodes }
+
+module.exports = { pingCluster, joinNode, removeNode, ping, nodes }
