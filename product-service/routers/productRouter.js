@@ -23,7 +23,7 @@ productRouter.get('/', async (request, response) => {
 })
 
 /**
- * The product endpoint accepts new products 
+ * The product endpoint accepts new products
  * @param {any} '/product'
  * @param {any} request
  * @param {any} response
