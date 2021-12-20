@@ -56,7 +56,7 @@ productRouter.post('/product', async (request, response) => {
  * @returns {any}
  */
 productRouter.post('/buy', async (request, response) => {
-  console.log("Nginx chose me nro1!")
+  console.log("Nginx chose me")
   const body = request.body
 
   let notInStock = []
