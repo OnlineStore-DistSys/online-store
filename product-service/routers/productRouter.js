@@ -3,8 +3,7 @@ const productRouter = require('express').Router()
 let { publishNet, products, updateProducts } = require('../messagebroker/messageBroker')
 
 /**
- * Description
- * @returns {any}
+ * Fetches products from local message-broker module
  */
 const update = async () => {
   products = await updateProducts() 
@@ -14,11 +13,9 @@ const update = async () => {
 update()
 
 /**
- * Description
- * @param {any} '/'
- * @param {any} async(request
+ * The root endpoint returns all products when requested
+ * @param {any} request
  * @param {any} response
- * @returns {any}
  */
 productRouter.get('/', async (request, response) => {
   console.log("Nginx chose me")
@@ -26,11 +23,10 @@ productRouter.get('/', async (request, response) => {
 })
 
 /**
- * Description
+ * The product endpoint accepts new products 
  * @param {any} '/product'
- * @param {any} async(request
+ * @param {any} request
  * @param {any} response
- * @returns {any}
  */
 productRouter.post('/product', async (request, response) => {
   console.log("Nginx chose me!")
