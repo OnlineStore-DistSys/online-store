@@ -22,7 +22,7 @@ const HomeComponent = (props) => {
     initProducts()
   }, [])
 
-  const buyProduct = (product) => {
+  const addProduct = (product) => {
     const addedProduct = { ...product, quantity: 1 } //add one instance of the product
     const alreadyAdded = props.cartItems.find((item) => item.id === addedProduct.id)
 
@@ -30,7 +30,7 @@ const HomeComponent = (props) => {
     if (!alreadyAdded) {
       props.setCartItems(props.cartItems.concat(addedProduct))
 
-    //if shopping cart has this item, increase the quantity by one
+      //if shopping cart has this item, increase the quantity by one
     } else {
       let modifiedProducts = props.cartItems
       let modifiedProduct = alreadyAdded
@@ -41,6 +41,14 @@ const HomeComponent = (props) => {
       }
       props.setCartItems(modifiedProducts)
     }
+
+    //not finished, trying to reduce quantity from local products
+    const found = products.find((item) => item.id === addedProduct.id)
+    console.log(found)
+    const modifiedFound = { ...found, quantity: found.quantity - 1 }
+    const prod = products.concat(modifiedFound)
+    const asd = prod.filter((item) => item !== found)
+    setProducts(asd)
 
     alert(`Added the following product to shopping cart: ${addedProduct.name}`)
   }
@@ -59,7 +67,7 @@ const HomeComponent = (props) => {
               <br />
               Price: {product.price}€<br />
               <br />
-              <Button onClick={() => { buyProduct(product) }}>Buy</Button>
+              <Button onClick={() => { addProduct(product) }}>Add to cart</Button>
               <br />
             </li>
           ))}

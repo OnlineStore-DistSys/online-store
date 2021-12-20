@@ -20,12 +20,7 @@ export const createProduct = async (newObject) => {
   return response.data
 }
 
-export const createCart = async (newObject) => {
-  const response = await axios.post("http://localhost/cart", newObject)
+export const buyProducts = async (newObject) => {
+  const response = await axios.post("http://localhost/buy", newObject)
   return response.data
-}
-
-export const getCartItems = async (newObject) => {
-  const cartProducts = await axios.get("http://localhost/")
-  return cartProducts.data
 }
