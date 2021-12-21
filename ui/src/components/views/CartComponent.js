@@ -1,16 +1,21 @@
 import { Button } from "../StyledComponents"
 import { buyProducts } from "../../services/productService"
 
+/**
+ * Shopping cart component
+ * @param {any} props
+ * @returns {any}
+ */
 const CartComponent = (props) => {
 
-  //removes the item from the shopping cart
+  
   const removeProduct = (cartItem) => {
-    props.setCartItems(props.cartItems.filter((item) => { return item != cartItem }))
+    props.setCartItems(props.cartItems.filter((item) => { return item !== cartItem }))
   }
 
-  //handles the purchasing event
-  const purchase = async () => {
 
+  const purchase = async () => {
+  //handles the purchasing event
     //send the purchase request into a product-service
     const res = await buyProducts({ items: props.cartItems })
 

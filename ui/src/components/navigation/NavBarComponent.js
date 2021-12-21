@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom'
 import ContainerStyles from '../../styles/ContainerStyles'
 
-//navigation bar on top of the page for easier navigation
+
+/**
+ * Navigation bar on top of the page for easier navigation
+ * @returns {any}
+ */
 const NavBarComponent = () => {
   return (
     <div>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: messagebroker/messageBroker.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: messagebroker/messageBroker.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable no-case-declarations */
+const config = require('../utils/config')
+const redis = require('redis')
+let { pingCluster, nodes, joinNode, removeNode } = require('../api/networkScanner')
+let { apiCall } = require('../api/apihandler')
+
+let products = [{
+  id: 1234567890,
+  name: 'Chair',
+  quantity: 100,
+  price: 99.95
+}]
+
+/**
+ * Getter for the list of products
+ * @returns {any}
+ */
+const updateProducts = async () => {
+  return products 
+}
+
+/**
+ * Launches the API call in order to fetch up-to-date product list
+ * @returns {any}
+ */
+const getData = async () => {
+    products = await apiCall()
+    console.log(products)
+    return products
+}
+
+/**
+ * The main loop. Orchestrates the initial joining, initial product data fetching, and cluster pings to spot failed nodes
+ * @param {any} publishNet
+ * @returns {any}
+ */
+const communicate = async (publishNet) => {
+  console.log(nodes)
+  if (nodes.length === 0) {
+    publishNet('join', config.SERVER)
+    setTimeout(()=> { if (nodes.length > 1) {
+      products = getData()
+     } else {
+      console.log('Im the only one')
+     }}, 5000 )
+  } 
+  pingCluster(publishNet) 
+  setTimeout(()=> communicate(publishNet), 5000)
+}
+
+//redis pub/sub channel initialization
+let subscriber = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+let publisher = redis.createClient(config.REDIS_PORT, config.REDIS_HOST)
+
+const channel = 'online store'
+
+//subscription to channel
+subscriber.subscribe(channel, (error, channel) => {
+  if (error) {
+      throw new Error(error);
+  }
+  console.log(`Subscribed to ${channel} channel. Listening for updates on the ${channel} channel...`)
+});
+
+/**
+ * This function is used for publishing messages to the redis channel
+ * @param {any} message
+ * @param {any} object
+ * @returns {any}
+ */
+const publishNet = ( message, object ) => {
+  const { id, name, quantity, price } = object
+
+  switch(message) {
+    case 'new':
+      publisher.publish(channel, `${message} ${id} ${name} ${quantity} ${price}`)
+      break
+    case 'sold':
+      publisher.publish(channel, `${message} ${object}`)
+      break
+    case 'crash':
+      publisher.publish(channel, `${message} ${object}`)
+      break
+    case 'join':
+      publisher.publish(channel, `${message} ${object}`)
+      break
+    default:
+       console.log(`All good, but nothing to publish`)
+  } 
+}
+
+/**
+ * This function is used for catching and processing messages that were heard from the redis channel
+ * @param {any} 'message'
+ * @param {any} (channel
+ * @param {any} message
+ * @returns {any}
+ */
+subscriber.on('message', (channel, message) => {
+  const parts = message.split(' ') // splitting the message parts
+  const [ msg, id, ...rest ] = parts
+
+  switch(msg) {
+    case 'new': //adds the product that someone published to the channel
+    const strLength = rest.length
+    const name = rest.slice(0, strLength-2)
+    const quantity = rest[rest.length - 2] 
+    const price = rest[rest.length - 1]  
+    const new_product = {
+        id: parseInt(id),
+        name: name,
+        quantity: parseInt(quantity),
+        price: parseFloat(price)
+      }
+      console.log(products)
+      products = products.concat(new_product)
+      console.log('new', products)
+      break
+    case 'sold': //reduces the products that were bought from some other node of the channel
+      let soldItem = {}
+      console.log('Before: ', products)
+      rest.map((n, index) => index % 2 === 0 ? 
+      soldItem = n : 
+      products = products.map(item => item.id == soldItem ? 
+        {...item, quantity: item.quantity - n} 
+        : item))
+      console.log('After: ', products)
+      break
+    case 'join': //handle a join request
+      joinNode(id, publishNet)
+      break
+    case 'crash': //remove a node whose crash was published to the redis channel
+      removeNode(id)
+      break
+    default:
+       console.log(`All good, but nothing to publish`)
+  } 
+})
+
+//launch the main loop
+communicate(publishNet)
+
+module.exports = { publishNet, products, updateProducts }</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#apiCall">apiCall</a></li><li><a href="global.html#communicate">communicate</a></li><li><a href="global.html#getData">getData</a></li><li><a href="global.html#handleFailed">handleFailed</a></li><li><a href="global.html#joinNode">joinNode</a></li><li><a href="global.html#ping">ping</a></li><li><a href="global.html#pingCluster">pingCluster</a></li><li><a href="global.html#publishNet">publishNet</a></li><li><a href="global.html#removeNode">removeNode</a></li><li><a href="global.html#update">update</a></li><li><a href="global.html#updateProducts">updateProducts</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Dec 21 2021 10:03:55 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
