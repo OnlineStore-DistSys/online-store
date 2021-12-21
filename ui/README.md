@@ -23,3 +23,9 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run generate-docs`
+
+You are able to generate detailed documentation using npm run generate-docs.
+
+Generated documentation are in the docs-folder in the YOUR-PATH-HERE/online-store/product-service/docs/index.html path.
