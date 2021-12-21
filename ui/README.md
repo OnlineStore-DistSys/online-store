@@ -1,6 +1,4 @@
-# Online-store
-
-[Documentation](https://github.com/OnlineStore-DistSys/online-store/wiki)
+# User interface
 
 ## Available Scripts
 
