@@ -12,6 +12,4 @@ This is a repository for _Online-store_ distributed system. In the online-store,
 
 [Architecture & techniques of the system](https://github.com/OnlineStore-DistSys/online-store/wiki/Architecture)
 
-[Task backlog](https://github.com/orgs/OnlineStore-DistSys/projects/1)
-
 [Git contributions](https://github.com/OnlineStore-DistSys/online-store/graphs/contributors)
